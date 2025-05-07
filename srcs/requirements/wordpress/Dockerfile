@@ -6,7 +6,12 @@ RUN apt update -y && \
     php7.3 \
     php-fpm \
     php-mysql \
-    mariadb-client
+    mariadb-client \
+    php7.3-mbstring \
+    php7.3-xml \
+    php7.3-curl \
+    php7.3-zip \
+    php7.3-gd
 
 RUN wget https://fr.wordpress.org/wordpress-6.0-fr_FR.tar.gz -P /var/www && \
     cd /var/www && \
@@ -21,8 +26,9 @@ RUN wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.ph
 
 COPY conf/www.conf /etc/php/7.3/fpm/pool.d/
 
-COPY tools/auto_config.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/auto_config.sh
+RUN mkdir -p /run/php && chown -R www-data:www-data /run/php
+COPY tools/auto_config.sh tools/auto_config.sh
+RUN chmod +x tools/auto_config.sh
 
-ENTRYPOINT ["/usr/local/bin/auto_config.sh"]
+ENTRYPOINT ["/tools/auto_config.sh"]
 CMD ["/usr/sbin/php-fpm7.3", "-F"]

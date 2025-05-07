@@ -1,25 +1,49 @@
 #!/bin/bash
 
+# Sleep to wait for the database to be ready
 sleep 10
-if [ -f /var/www/wordpress/wp-config.php ]; then
-	echo "wordpress already configured"
+
+echo "Configuring WordPress..."
+# Set up WordPress configuration (only if it doesn't exist)
+if [ ! -f /var/www/wordpress/wp-config.php ]; then
+    wp config create --allow-root \
+        --dbname="$SQL_DATABASE" \
+        --dbuser="$SQL_USER" \
+        --dbpass="$SQL_PASSWORD" \
+        --dbhost=mariadb \
+        --path='/var/www/wordpress' || { echo "wp config create failed"; exit 1; }
 else
-	echo "configuring wordpress"
-	wp config create	--allow-root \
-						--dbname=$SQL_DATABASE \
-						--dbuser=$SQL_USER \
-						--dbpass=$SQL_PASSWORD \
-						--dbhost=mariadb --path='/var/www/wordpress'
-	wp core install	--allow-root \
-						--title=$WORDPRESS_TITLE \
-						--admin_user=$WORDPRESS_ADMIN \
-						--admin_password=$WORDPRESS_ADMIN_PASSWORD \
-						--admin_email=$WORDPRESS_ADMIN_EMAIL \
-						--path='/var/www/wordpress'
-	wp user create	--allow-root \
-						$WORDPRESS_USER \
-						$WORDPRESS_EMAIL \
-						--role=author \
-						--user_pass=$WORDPRESS_USER_PASSWORD \
-						--path='/var/www/wordpress'
+    echo "wp-config.php already exists, skipping config creation"
 fi
+
+# Install WordPress core (only if not installed)
+if ! wp core is-installed --allow-root --path='/var/www/wordpress'; then
+    wp core install --allow-root \
+        --url="https://localhost" \
+        --title="$WORDPRESS_TITLE" \
+        --admin_user="$WORDPRESS_ADMIN" \
+        --admin_password="$WORDPRESS_ADMIN_PASSWORD" \
+        --admin_email="$WORDPRESS_ADMIN_EMAIL" \
+        --path='/var/www/wordpress' || { echo "wp core install failed"; exit 1; }
+else
+    echo "WordPress already installed, skipping core install"
+fi
+
+# Create WordPress user (only if user doesn't exist)
+if ! wp user get "$WORDPRESS_USER" --allow-root --path='/var/www/wordpress' > /dev/null 2>&1; then
+    wp user create --allow-root \
+        "$WORDPRESS_USER" \
+        "$WORDPRESS_EMAIL" \
+        --role=author \
+        --user_pass="$WORDPRESS_USER_PASSWORD" \
+        --path='/var/www/wordpress' || { echo "wp user create failed"; exit 1; }
+else
+    echo "User '$WORDPRESS_USER' already exists, skipping user creation"
+fi
+
+echo "WordPress configured successfully"
+
+# Start PHP-FPM (keep container running)
+echo "Starting PHP-FPM..."
+exec /usr/sbin/php-fpm7.3 -F
+
