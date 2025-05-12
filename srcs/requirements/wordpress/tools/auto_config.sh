@@ -19,7 +19,7 @@ fi
 # Install WordPress core (only if not installed)
 if ! wp core is-installed --allow-root --path='/var/www/wordpress'; then
     wp core install --allow-root \
-        --url=kyang.42.fr \
+        --url="$DOMAIN_NAME" \
         --title="$WORDPRESS_TITLE" \
         --admin_user="$WORDPRESS_ADMIN" \
         --admin_password="$WORDPRESS_ADMIN_PASSWORD" \
