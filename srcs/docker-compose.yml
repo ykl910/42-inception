@@ -4,6 +4,7 @@ services:
   nginx:
     build: requirements/nginx/.
     container_name: nginx
+    image: nginx:42
     networks:
       - inception
     depends_on:
@@ -12,11 +13,12 @@ services:
       - wordpress:/var/www/html
     ports:
       - "443:443"
-    restart: always
+    restart: on-failure
 
   wordpress:
     build: requirements/wordpress/.
     container_name: wordpress
+    image: wordpress:42
     networks:
       - inception
     depends_on:
@@ -27,11 +29,12 @@ services:
       - .env
     expose:
       - "9000"
-    restart: no
+    restart: on-failure
 
   mariadb:
     build: requirements/mariadb/.
     container_name: mariadb
+    image: mariadb:42
     networks:
       - inception
     volumes: 
@@ -40,7 +43,7 @@ services:
       - .env
     expose:
       - "3306"
-    restart: always
+    restart: unless-stopped
 
 volumes:
   wordpress:

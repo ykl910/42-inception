@@ -19,7 +19,7 @@ fi
 # Install WordPress core (only if not installed)
 if ! wp core is-installed --allow-root --path='/var/www/wordpress'; then
     wp core install --allow-root \
-        --url="https://localhost" \
+        --url=kyang.42.fr \
         --title="$WORDPRESS_TITLE" \
         --admin_user="$WORDPRESS_ADMIN" \
         --admin_password="$WORDPRESS_ADMIN_PASSWORD" \
@@ -30,18 +30,15 @@ else
 fi
 
 # Create WordPress user (only if user doesn't exist)
-if ! wp user get "$WORDPRESS_USER" --allow-root --path='/var/www/wordpress' > /dev/null 2>&1; then
-    wp user create --allow-root \
+if wp user list --allow-root --path='/var/www/wordpress' --field=user_login | grep -q "^$WORDPRESS_USER$"; then
+    echo "User '$WORDPRESS_USER' already exists, skipping user creation"
+else wp user create --allow-root \
         "$WORDPRESS_USER" \
         "$WORDPRESS_EMAIL" \
         --role=author \
         --user_pass="$WORDPRESS_USER_PASSWORD" \
         --path='/var/www/wordpress' || { echo "wp user create failed"; exit 1; }
-else
-    echo "User '$WORDPRESS_USER' already exists, skipping user creation"
 fi
-
-echo "WordPress configured successfully"
 
 # Start PHP-FPM (keep container running)
 echo "Starting PHP-FPM..."
