@@ -13,10 +13,11 @@ RUN apt update -y && \
     php7.3-zip \
     php7.3-gd
 
-RUN wget https://fr.wordpress.org/wordpress-6.0-fr_FR.tar.gz -P /var/www && \
-    cd /var/www && \
-    tar -xzf wordpress-6.0-fr_FR.tar.gz && \
-    rm wordpress-6.0-fr_FR.tar.gz && \
+RUN mkdir -p /var/www/wordpress && \
+    wget https://fr.wordpress.org/wordpress-6.0-fr_FR.tar.gz -O /tmp/wordpress.tar.gz && \
+    tar -xzf /tmp/wordpress.tar.gz -C /tmp && \
+    mv /tmp/wordpress/* /var/www/wordpress/ && \
+    rm -rf /tmp/wordpress* && \
     chown -R www-data:www-data /var/www/wordpress
 
 RUN wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
