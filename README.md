@@ -33,7 +33,3 @@ Clone the repo, optionally configure `.env`, then run `make up` to start contain
 - Persistent volumes store WordPress and database data  
 - Services communicate over a custom Docker network  
 
-## Troubleshooting 🛠️  
-- Check MariaDB logs if WordPress fails to connect  
-- Verify SSL certificates inside the NGINX container  
-- Ensure correct permissions on volume mounts  
