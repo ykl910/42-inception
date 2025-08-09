@@ -1,17 +1,17 @@
-FROM debian:buster
+FROM debian:bullseye
 
 RUN apt update -y && \
     apt upgrade -y && \
     apt-get install -y wget \
-    php7.3 \
+    php7.4 \
     php-fpm \
     php-mysql \
     mariadb-client \
-    php7.3-mbstring \
-    php7.3-xml \
-    php7.3-curl \
-    php7.3-zip \
-    php7.3-gd
+    php7.4-mbstring \
+    php7.4-xml \
+    php7.4-curl \
+    php7.4-zip \
+    php7.4-gd
 
 RUN mkdir -p /var/www/wordpress && \
     wget https://fr.wordpress.org/wordpress-6.0-fr_FR.tar.gz -O /tmp/wordpress.tar.gz && \
@@ -25,11 +25,11 @@ RUN wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.ph
     mv wp-cli.phar /usr/local/bin/wp && \
     wp --info --allow-root
 
-COPY conf/www.conf /etc/php/7.3/fpm/pool.d/
+COPY conf/www.conf /etc/php/7.4/fpm/pool.d/
 
 RUN mkdir -p /run/php && chown -R www-data:www-data /run/php
 COPY tools/auto_config.sh tools/auto_config.sh
 RUN chmod +x tools/auto_config.sh
 
 ENTRYPOINT ["/tools/auto_config.sh"]
-CMD ["/usr/sbin/php-fpm7.3", "-F"]
+CMD ["/usr/sbin/php-fpm7.4", "-F"]
